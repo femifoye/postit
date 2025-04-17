@@ -1,0 +1,53 @@
+services:
+  postit:
+    image: ghcr.io/gitroomhq/postit-app:latest
+    env_vars:
+      MAIN_URL: "https://postit.trakjungle.com"
+      FRONTEND_URL: "https://postit.trakjungle.com"
+      NEXT_PUBLIC_BACKEND_URL: "https://postit.trakjungle.com/api"
+      JWT_SECRET: "E6xRtP9zD3jKw2mN5aVqS8cU7bH4gF1Z"
+      DATABASE_URL: "postgresql://postit-user:postit-password@postit-postgres:5432/postit-db-local"
+      REDIS_URL: "redis://postit-redis:6379"
+      BACKEND_INTERNAL_URL: "http://localhost:3000"
+      IS_GENERAL: "true"
+      STORAGE_PROVIDER: "local"
+      UPLOAD_DIRECTORY: "/uploads"
+      NEXT_PUBLIC_UPLOAD_DIRECTORY: "/uploads"
+    volumes:
+      - "/opt/postit/config:/config"
+      - "/opt/postit/uploads:/uploads"
+    ports:
+      - container: 5000
+        http: 80
+        https: 443
+    health:
+      type: http
+      endpoint: /api/health
+      protocol: https
+      expected: 200
+      timeout: 10
+      initial_delay: 30
+
+  postit-postgres:
+    image: postgres:17-alpine
+    env_vars:
+      POSTGRES_PASSWORD: "postit-password"
+      POSTGRES_USER: "postit-user"
+      POSTGRES_DB: "postit-db-local"
+    volumes:
+      - "/opt/postit/postgres-data:/var/lib/postgresql/data"
+    health:
+      type: exec
+      command: pg_isready -U postit-user -d postit-db-local
+      timeout: 3
+      initial_delay: 10
+
+  postit-redis:
+    image: redis:7.2
+    volumes:
+      - "/opt/postit/redis-data:/data"
+    health:
+      type: exec
+      command: redis-cli ping
+      timeout: 3
+      initial_delay: 10

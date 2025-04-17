@@ -1,0 +1,22 @@
+production:
+  infomaniak:
+    server:
+      unique_name: postit-server
+      address: 185.143.100.110
+      user: ubuntu
+      # Option 1: Reference a key that's already uploaded to Cloud 66
+      key_name: postit-infomaniak-key
+      # Option 2: Use environment variable (uncomment if using this approach)
+      # ssh_key: <%= ENV['INFOMANIAK_SSH_KEY'] %>
+    configuration:
+      docker:
+        version: 19.03.0+
+      os: 
+        name: ubuntu
+        version: 20.04
+    hooks:
+      first_thing: 
+        command: apt-get update && apt-get install -y htop
+        target: any
+        run_on: single_server
+        apply_during: all
